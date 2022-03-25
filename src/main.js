@@ -13,7 +13,7 @@ import App from './App'
 import '@/style/tailwind.css'
 import '@/style/index.scss'
 
-Vue.component('divider', divider)
+Vue.component('Divider', divider)
 
 const relativeTime = require('dayjs/plugin/relativeTime')
 const localeCN = require('dayjs/locale/zh-cn')
@@ -43,6 +43,6 @@ App.mpType = 'app'
 Vue.use(uView)
 
 const app = new Vue({
-  ...App,
+  ...App
 })
 app.$mount()

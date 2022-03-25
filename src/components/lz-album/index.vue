@@ -1,40 +1,60 @@
 <template>
-	<view class="w-full h-full dragsort-box">
-		<movable-area id="drag" class="w-full dragsort-area">
-			<view id="dragsort-before" class="dragsort-before">
-				<slot name="before"></slot>
-			</view>
-			<view id="dragsort-list" class="dragsort-list" :style="{'height':listHeight+'px'}"></view>
-			<movable-view v-for="(item, index) in list" :key="index" :x="item.x" :y="item.y"
-                    :data-id="item.id" :data-sortid="item.sortID" :data-isadd="item.isAdd"
-                    @touchstart="touchstart" @touchmove.stop="touchmove" @touchend="touchend"
-                    :direction="item.direction" damping="40" :animation="item.animation"
-                    :disabled="item.disabled" class="layout-items-center dragsort-view"
-                    :class="{
-                      'dragsort-view-active': isDrag&&activeModel&&activeModel.id === item.id
-                    }"
-                    :style="{ 'width':item.width+'px', 'height':item.height+'px' }">
-				<view v-if="!item.isAdd" class="dragsort-view-item" @click.stop="onClick(item,index,list)">
-          <video class="preview-video" v-if="item.fileType === 'video'" :src="item.src"></video>
-          <u-image v-else width="100%" height="100%" :src="fixResourcesUrl(item.src)"
-                   @click="previewImg"></u-image>
+  <view class="w-full h-full dragsort-box">
+    <movable-area id="drag" class="w-full dragsort-area">
+      <view id="dragsort-before" class="dragsort-before">
+        <slot name="before" />
+      </view>
+      <view id="dragsort-list" :style="{'height':listHeight+'px'}" class="dragsort-list" />
+      <movable-view
+        v-for="(item, index) in list"
+        :key="index"
+        :animation="item.animation"
+        :class="{
+          'dragsort-view-active': isDrag&&activeModel&&activeModel.id === item.id
+        }"
+        :data-id="item.id"
+        :data-isadd="item.isAdd"
+        :data-sortid="item.sortID"
+        :direction="item.direction"
+        :disabled="item.disabled"
+        :style="{ 'width':item.width+'px', 'height':item.height+'px' }"
+        :x="item.x"
+        :y="item.y"
+        class="layout-items-center dragsort-view"
+        damping="40"
+        @touchend="touchend"
+        @touchmove.stop="touchmove"
+        @touchstart="touchstart"
+      >
+        <view v-if="!item.isAdd" class="dragsort-view-item" @click.stop="onClick(item,index,list)">
+          <video v-if="item.fileType === 'video'" :src="item.src" class="preview-video" />
+          <u-image
+            v-else
+            :src="fixResourcesUrl(item.src)"
+            height="100%"
+            width="100%"
+            @click="previewImg"
+          />
         </view>
-				<view v-if="item.isAdd" class="dragsort-view-item" @click.stop="onAdd">
-					<view class="layout-center w-full h-full btnAdd">
-						<u-icon class="btnAdd-icon" name="plus" color="#B2B2B2" size="90"></u-icon>
-					</view>
-				</view>
-			</movable-view>
-			<view id="dragsort-after" class="dragsort-after">
-				<slot name="after"></slot>
-			</view>
-			<view id="dragsort-delete" class="w-full layout-col-around dragsort-delete"
-            :class="isDrag?'opacity':''">
-				<u-icon class="deleteicon" name="trash" color="#FFFFFF" size="34"></u-icon>
-				<view>{{deleteText}}</view>
-			</view>
-		</movable-area>
-	</view>
+        <view v-if="item.isAdd" class="dragsort-view-item" @click.stop="onAdd">
+          <view class="layout-center w-full h-full btnAdd">
+            <u-icon class="btnAdd-icon" color="#B2B2B2" name="plus" size="90" />
+          </view>
+        </view>
+      </movable-view>
+      <view id="dragsort-after" class="dragsort-after">
+        <slot name="after" />
+      </view>
+      <view
+        id="dragsort-delete"
+        :class="isDrag?'opacity':''"
+        class="w-full layout-col-around dragsort-delete"
+      >
+        <u-icon class="deleteicon" color="#FFFFFF" name="trash" size="34" />
+        <view>{{ deleteText }}</view>
+      </view>
+    </movable-area>
+  </view>
 </template>
 
 <script>
@@ -49,9 +69,58 @@ const touchMoveDebounceWait = 10
 let lastTouchE = null
 
 export default {
-  name: 'drag-sort',
-  mixins: [],
+  name: 'DragSort',
   components: {},
+  filters: {},
+  mixins: [],
+  props: {
+    value: {
+      type: Array,
+      default: () => []
+    },
+    // 默认3列
+    column: {
+      type: Number,
+      default: () => 3
+    },
+    // 元素最多数量
+    maxCount: {
+      type: Number,
+      default: () => 36
+    },
+    // 容器左右内间隔【同padding】,单位px
+    areaXGap: {
+      type: Number,
+      default: () => 15
+    },
+    // 容器上下内间隔【同padding】,单位px
+    areaYGap: {
+      type: Number,
+      default: () => 10
+    },
+    // 元素的间距【元素和元素之间的间隔】,单位px
+    viewGap: {
+      type: Number,
+      default: () => 4
+    },
+    // eslint-disable-next-line
+    lon_lat: {
+      type: Object,
+      default: () => ({})
+    },
+    location: {
+      type: String,
+      default: ''
+    },
+    weather: {
+      type: String,
+      default: ''
+    },
+    address: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       list: [], // 外部传入集合总数
@@ -76,57 +145,10 @@ export default {
       modelCount: 0, // 记录元素个数，排除新增按钮元素
       maxSortID: 0, // 当前数组中最大的排序号
       addObject: null, // 新增按钮实体元素
-      isUpdate: false, // 数据是否需要更新，如果没有找到目标元素，那么此值始终是false，用于判断是否需要触发update更新事件
+      isUpdate: false // 数据是否需要更新，如果没有找到目标元素，那么此值始终是false，用于判断是否需要触发update更新事件
     }
   },
-  computed: { },
-  props: {
-    value: {
-      type: Array,
-      default: () => [],
-    },
-    // 默认3列
-    column: {
-      type: Number,
-      default: () => 3,
-    },
-    // 元素最多数量
-    maxCount: {
-      type: Number,
-      default: () => 36,
-    },
-    // 容器左右内间隔【同padding】,单位px
-    areaXGap: {
-      type: Number,
-      default: () => 15,
-    },
-    // 容器上下内间隔【同padding】,单位px
-    areaYGap: {
-      type: Number,
-      default: () => 10,
-    },
-    // 元素的间距【元素和元素之间的间隔】,单位px
-    viewGap: {
-      type: Number,
-      default: () => 4,
-    },
-    lon_lat: {
-      type: Object,
-      default: () => ({}),
-    },
-    location: {
-      type: String,
-      default: '',
-    },
-    weather: {
-      type: String,
-      default: '',
-    },
-    address: {
-      type: String,
-      default: '',
-    },
-  },
+  computed: {},
   watch: {
     value: {
       handler() {
@@ -135,19 +157,19 @@ export default {
         this.init()
         this.initGrid()
       },
-      deep: true,
-    },
+      deep: true
+    }
   },
   created() {
     const res = uni.getSystemInfoSync()
     this.windowWidth = res.windowWidth
   },
   mounted() {
-    this.$nextTick(function () {
+    this.$nextTick(function() {
       const query = uni.createSelectorQuery().in(this)
       query.select('#dragsort-before').boundingClientRect()
       query.select('#dragsort-after').boundingClientRect()
-      query.exec((res) => {
+      query.exec(res => {
         this.beforeHeight = res[0].height
         this.afterHeight = res[1].height
 
@@ -157,15 +179,13 @@ export default {
     })
   },
   updated() {},
-  filters: {},
   methods: {
     previewImg() {
       uni.previewImage({
         urls: this.list,
         longPressActions: {
-          itemList: ['保存图片'],
-
-        },
+          itemList: ['保存图片']
+        }
       })
     },
     reset() {
@@ -179,7 +199,7 @@ export default {
       }
 
       // 先根据排序编号进行排序,序号越小越靠前
-      arr.sort(function (a, b) {
+      arr.sort(function(a, b) {
         return a.sortID - b.sortID
       })
       // 只取前this.maxCount个元素，不能多于this.maxCount个元素
@@ -201,7 +221,7 @@ export default {
           id: 0,
           sortID: 10000, // 按钮始终放在末尾位置，默认排序号10000
           src: '',
-          isAdd: true,
+          isAdd: true
         })
       }
     },
@@ -210,14 +230,21 @@ export default {
       const arr = []
       let x = 0
       // let y = this.beforeHeight;
-      let tmpIndex = 0
+      // let tmpIndex = 0
       if (list && list.length > 0) {
         // 先计算出总行数
         this.row = Math.ceil(list.length / this.column)
         // 计算每个元素的宽高，宽高相同,这里屏幕宽度-容器内间距*2（包含左右的内间距）-元素间距（元素的数量-1即为这个间距值的数量，比如3个元素，那么只会有1和2的间距，2和3的间距）
-        this.height = this.width = (this.windowWidth - this.areaXGap * 2 - (this.column - 1) * this.viewGap) / this.column
+        this.height = this.width =
+          (this.windowWidth -
+            this.areaXGap * 2 -
+            (this.column - 1) * this.viewGap) /
+          this.column
         // 元素列表所占据的总高度（包含各种内边距，元素和元素的间距）
-        this.listHeight = this.height * this.row + this.areaYGap * 2 + (this.row - 1) * this.viewGap
+        this.listHeight =
+          this.height * this.row +
+          this.areaYGap * 2 +
+          (this.row - 1) * this.viewGap
         // 每行循环，设置x和y偏移
         for (var row = 1; row <= this.row; row++) {
           // 取出第一行数据，根据分页算法
@@ -227,9 +254,12 @@ export default {
           const rowList = list.slice(min, max)
           // 计算偏移
           const lastx = this.areaXGap
-          const lasty = (this.beforeHeight + this.areaYGap + (row - 1) * (this.height + this.viewGap))
+          const lasty =
+            this.beforeHeight +
+            this.areaYGap +
+            (row - 1) * (this.height + this.viewGap)
           rowList.map((item, index) => {
-            if (index == 0) {
+            if (index === 0) {
               x = lastx
             } else {
               x = lastx + index * (this.width + this.viewGap)
@@ -246,7 +276,7 @@ export default {
                 rowNumber: row,
                 columnNumber: index + 1,
                 width: this.width,
-                height: this.height,
+                height: this.height
               }
               arr.push(this.addObject)
             } else {
@@ -261,10 +291,10 @@ export default {
                 rowNumber: row,
                 columnNumber: index + 1,
                 width: this.width,
-                height: this.height,
+                height: this.height
               })
             }
-            tmpIndex++
+            // tmpIndex++
           })
         }
       }
@@ -284,7 +314,14 @@ export default {
       this.list.map((res, index) => {
         // 如果当前鼠标坐标在目标元素内则重排更新排序号
         // 需要排除掉自己和上传图片按钮
-        if (res.x < touchX && touchX <= (res.x + this.width) && touchY > res.y && touchY <= (res.y + this.height) && this.activeModel.id != res.id && !res.isAdd) {
+        if (
+          res.x < touchX &&
+          touchX <= res.x + this.width &&
+          touchY > res.y &&
+          touchY <= res.y + this.height &&
+          this.activeModel.id !== res.id &&
+          !res.isAdd
+        ) {
           // 此处目标元素肯定不是上传图片按钮，所以设置一下标志
           isAddContain = false
           // 记录目标索引ID
@@ -342,7 +379,7 @@ export default {
           let sortid = this.activeModel.sortID - 1
           for (; sortid >= targetSortID; sortid--) {
             const model = this.getModelBySortID(sortid)
-            model.x += (this.width + this.viewGap)
+            model.x += this.width + this.viewGap
             model.sortID++
             model.columnNumber++
           }
@@ -357,11 +394,16 @@ export default {
               // 如果当前元素处于最后一列，那么需要换行
               model.columnNumber = 1
               model.rowNumber++
-              model.y = (this.beforeHeight + this.areaYGap + (model.rowNumber - 1) * (this.height + this.viewGap))
-              model.x = this.areaXGap + (model.columnNumber - 1) * (this.width + this.viewGap)
+              model.y =
+                this.beforeHeight +
+                this.areaYGap +
+                (model.rowNumber - 1) * (this.height + this.viewGap)
+              model.x =
+                this.areaXGap +
+                (model.columnNumber - 1) * (this.width + this.viewGap)
             } else {
               // 如果当前元素不处于临界状态，不需要考虑换行问题
-              model.x += (this.width + this.viewGap)
+              model.x += this.width + this.viewGap
               model.columnNumber++
             }
           }
@@ -373,7 +415,7 @@ export default {
           let sortid = this.activeModel.sortID + 1
           for (; sortid <= targetSortID; sortid++) {
             const model = this.getModelBySortID(sortid)
-            model.x -= (this.width + this.viewGap)
+            model.x -= this.width + this.viewGap
             model.sortID--
             model.columnNumber--
           }
@@ -388,11 +430,16 @@ export default {
               // 如果当前元素处于第一列，那么需要减一行
               model.columnNumber = this.column
               model.rowNumber--
-              model.y = (this.beforeHeight + this.areaYGap + (model.rowNumber - 1) * (this.height + this.viewGap))
-              model.x = this.areaXGap + (model.columnNumber - 1) * (this.width + this.viewGap)
+              model.y =
+                this.beforeHeight +
+                this.areaYGap +
+                (model.rowNumber - 1) * (this.height + this.viewGap)
+              model.x =
+                this.areaXGap +
+                (model.columnNumber - 1) * (this.width + this.viewGap)
             } else {
               // 如果当前元素不处于临界状态，不需要考虑换行问题
-              model.x -= (this.width + this.viewGap)
+              model.x -= this.width + this.viewGap
               model.columnNumber--
             }
           }
@@ -408,7 +455,7 @@ export default {
       // 找出当前删除元素的索引
       let _index = -1
       this.list.map((item, index) => {
-        if (item == this.activeModel) {
+        if (item === this.activeModel) {
           _index = index
         }
       })
@@ -420,7 +467,10 @@ export default {
       // 取出元素【排序】最后一个元素，把一些旧的数据记录起来
       // 这里不能直接用索引取！！！
       // 这里还需要判断当前删除的元素是不是排序最大的那个，如果是的话lastModel就是activeModel
-      const lastModel = this.maxSortID == activeSortID ? this.activeModel : this.getModelBySortID(this.maxSortID)
+      const lastModel =
+        this.maxSortID === activeSortID
+          ? this.activeModel
+          : this.getModelBySortID(this.maxSortID)
       // var lastX= lastModel.x;
       // var lastY= lastModel.y;
       const lastRowNumber = lastModel.rowNumber
@@ -435,21 +485,26 @@ export default {
           if (!model.isAdd) {
             model.sortID--
           }
-          if (model.rowNumber == 1) {
+          if (model.rowNumber === 1) {
             // 如果第一行y偏移不变，行数不变
-            model.x -= (this.width + this.viewGap)
+            model.x -= this.width + this.viewGap
             model.columnNumber--
           } else {
             // 如果不是第一行情况下
-            if (model.columnNumber == 1) {
+            if (model.columnNumber === 1) {
               // 如果当前元素处于第一列，那么需要减一行，并且列需要变成上一行最后一个元素
               model.columnNumber = this.column
               model.rowNumber--
-              model.y = (this.beforeHeight + this.areaYGap + (model.rowNumber - 1) * (this.height + this.viewGap))
-              model.x = this.areaXGap + (model.columnNumber - 1) * (this.width + this.viewGap)
+              model.y =
+                this.beforeHeight +
+                this.areaYGap +
+                (model.rowNumber - 1) * (this.height + this.viewGap)
+              model.x =
+                this.areaXGap +
+                (model.columnNumber - 1) * (this.width + this.viewGap)
             } else {
               // 如果当前元素不处于临界状态，不需要考虑换行问题
-              model.x -= (this.width + this.viewGap)
+              model.x -= this.width + this.viewGap
               model.columnNumber--
             }
           }
@@ -475,17 +530,25 @@ export default {
           rowNumber: lastRowNumber,
           columnNumber: lastColumnNumber,
           width: this.width,
-          height: this.height,
+          height: this.height
         }
-        this.addObject.x = this.areaXGap + (this.addObject.columnNumber - 1) * (this.width + this.viewGap)
-        this.addObject.y = (this.beforeHeight + this.areaYGap + (this.addObject.rowNumber - 1) * (this.height + this.viewGap))
+        this.addObject.x =
+          this.areaXGap +
+          (this.addObject.columnNumber - 1) * (this.width + this.viewGap)
+        this.addObject.y =
+          this.beforeHeight +
+          this.areaYGap +
+          (this.addObject.rowNumber - 1) * (this.height + this.viewGap)
 
         this.list.push(this.addObject)
         // console.info(this.list);
       }
       // console.info(this.addObject);
       // 元素列表所占据的总高度（包含各种内边距，元素和元素的间距）
-      this.listHeight = this.height * this.addObject.rowNumber + this.areaYGap * 2 + (this.addObject.rowNumber - 1) * this.viewGap
+      this.listHeight =
+        this.height * this.addObject.rowNumber +
+        this.areaYGap * 2 +
+        (this.addObject.rowNumber - 1) * this.viewGap
     },
     touchstart(e) {
       // 如果是新增按钮被触及不用管
@@ -497,14 +560,14 @@ export default {
       // 这里是因为click事件也会触发touchstart、touchmove、touchend事件
       // 所以防抖延迟处理，如果是click，那么会依次立即触发touchstart->touchmove->touchend，而在touchend中会将定时器清除
       // 如果是按住不动保持touchDebounceWait时间，此时不会触发touchend事件
-      touchTimeOut = setTimeout(function () {
+      touchTimeOut = setTimeout(function() {
         me.isDrag = true
 
         // 计算 x y 轴点击位置
         const query = uni.createSelectorQuery().in(me)
         query.select('#drag').boundingClientRect()
         query.select('#dragsort-delete').boundingClientRect()
-        query.exec((res) => {
+        query.exec(res => {
           // 获取删除区域信息
           me.deleteArea = res[1]
           // console.info(res);
@@ -542,15 +605,21 @@ export default {
 
       const me = this
       if (touchMoveTimeOut) clearTimeout(touchMoveTimeOut)
-      touchMoveTimeOut = setTimeout(function () {
+      touchMoveTimeOut = setTimeout(function() {
         // 如果当前拖拽元素不存在，直接返回
         if (me.activeModel == null) return
 
         // 这里主要是为了解决touchmove触发比较频繁，而手指在操作时候，会产生小范围抖动，会造成拖动元素快速来回抖动
         // 所以这里修复如果和上次相比，移动距离小于20px则直接会返回
         if (lastTouchE) {
-          if (Math.abs(e.mp.touches[0].clientY - lastTouchE.mp.touches[0].clientY) < 20 &&
-						Math.abs(e.mp.touches[0].clientX - lastTouchE.mp.touches[0].clientX) < 20) {
+          if (
+            Math.abs(
+              e.mp.touches[0].clientY - lastTouchE.mp.touches[0].clientY
+            ) < 20 &&
+            Math.abs(
+              e.mp.touches[0].clientX - lastTouchE.mp.touches[0].clientX
+            ) < 20
+          ) {
             return
           }
         }
@@ -582,7 +651,7 @@ export default {
         // touchmove触发太频繁，防抖处理，N秒后判断是否需要更改排序和偏移
         // 这里防抖函数使用util内的，延迟没有作用，还是会执行多次，暂时无法解决 不知道什么问题
         if (timeOut) clearTimeout(timeOut)
-        timeOut = setTimeout(function () {
+        timeOut = setTimeout(function() {
           me.findTarget(temX, temY)
         }, debounceWait)
       }, touchMoveDebounceWait)
@@ -611,7 +680,7 @@ export default {
         this.maxSortID--
         this.$emit('delete', {
           model: this.activeModel,
-          list: this.list.filter(item => !item.isAdd),
+          list: this.list.filter(item => !item.isAdd)
         })
       } else {
         // 将拖拽元素移动到排序号所在的位置
@@ -630,7 +699,10 @@ export default {
         // 如果确实更新了数据，那么触发事件
         if (this.isUpdate) {
           this.isUpdate = false
-          this.$emit('sort', this.list.filter(item => !item.isAdd))
+          this.$emit(
+            'sort',
+            this.list.filter(item => !item.isAdd)
+          )
         }
       }
 
@@ -646,7 +718,7 @@ export default {
       // 根据主键key查找元素
       if (this.list && this.list.length > 0) {
         for (let i = 0; i < this.list.length; i++) {
-          if (this.list[i].id == pk_id) {
+          if (this.list[i].id === pk_id) {
             return this.list[i]
           }
         }
@@ -657,7 +729,7 @@ export default {
       // 根据主键key查找元素
       if (this.list && this.list.length > 0) {
         for (let i = 0; i < this.list.length; i++) {
-          if (this.list[i].sortID == sortID) {
+          if (this.list[i].sortID === sortID) {
             return this.list[i]
           }
         }
@@ -668,7 +740,7 @@ export default {
       this.$emit('click', {
         model,
         index,
-        list: list.filter(item => !item.isAdd),
+        list: list.filter(item => !item.isAdd)
       })
     },
     onAdd() {
@@ -677,7 +749,7 @@ export default {
         count: 9 - self.modelCount, // 默认9
         sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
         sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
-        success: (res) => {
+        success: res => {
           console.log(res)
           if (res.tempFiles) {
             res.tempFiles.map((item, index) => {
@@ -689,7 +761,11 @@ export default {
                 const filePath = item.tempFilePath
                 // 上传图片
                 const prefix = item.fileType === 'video' ? 'video' : 'image'
-                const cloudPath = prefix + '-' + Date.now().toString() + filePath.match(/\.[^.]+?$/)[0]
+                const cloudPath =
+                  prefix +
+                  '-' +
+                  Date.now().toString() +
+                  filePath.match(/\.[^.]+?$/)[0]
                 wx.cloud.uploadFile({
                   cloudPath,
                   filePath,
@@ -697,28 +773,30 @@ export default {
                     console.log('[上传文件] 成功：', res)
                     delete item.tempFilePath
                     if (item.fileType === 'video') {
-                      wx.cloud.uploadFile({
-                        cloudPath: 'thumb-' + cloudPath,
-                        filePath: item.thumbTempFilePath,
-                      }).then(thumbRes => {
-                        delete item.thumbTempFilePath
-                        this.saveToDB({
-                          cloudPath: res.fileID,
-                          createTime: Date.now(),
-                          location: this.location,
-                          lon_lat: this.lon_lat,
-                          weather: this.weather,
-                          thumbCloudPath: thumbRes.fileID,
-                          ...item,
+                      wx.cloud
+                        .uploadFile({
+                          cloudPath: 'thumb-' + cloudPath,
+                          filePath: item.thumbTempFilePath
                         })
-                        self.$emit('add', {
-                          ...item,
-                          src,
-                          cloudPath: res.fileID,
-                          sortID: self.maxSortID,
-                          thumbCloudPath: thumbRes.fileID,
+                        .then(thumbRes => {
+                          delete item.thumbTempFilePath
+                          this.saveToDB({
+                            cloudPath: res.fileID,
+                            createTime: Date.now(),
+                            location: this.location,
+                            lon_lat: this.lon_lat,
+                            weather: this.weather,
+                            thumbCloudPath: thumbRes.fileID,
+                            ...item
+                          })
+                          self.$emit('add', {
+                            ...item,
+                            src,
+                            cloudPath: res.fileID,
+                            sortID: self.maxSortID,
+                            thumbCloudPath: thumbRes.fileID
+                          })
                         })
-                      })
                     } else {
                       this.saveToDB({
                         cloudPath: res.fileID,
@@ -726,10 +804,13 @@ export default {
                         location: this.location,
                         lon_lat: this.lon_lat,
                         weather: this.weather,
-                        ...item,
+                        ...item
                       })
                       self.$emit('add', {
-                        ...item, src, cloudPath: res.fileID, sortID: self.maxSortID,
+                        ...item,
+                        src,
+                        cloudPath: res.fileID,
+                        sortID: self.maxSortID
                       })
                     }
                   },
@@ -737,23 +818,21 @@ export default {
                     console.error('[上传文件] 失败：', e)
                     wx.showToast({
                       icon: 'none',
-                      title: '上传失败',
+                      title: '上传失败'
                     })
                   },
                   complete: () => {
                     wx.hideLoading()
-                  },
+                  }
                 })
               }, 200)
             })
           }
-        },
+        }
       })
     },
     saveToDB(data) {
-      const actions = [
-        { method: 'add', params: { data } }
-      ]
+      const actions = [{ method: 'add', params: { data }}]
       dbRequest('album', actions)
     },
     // 供外部调用，新增一个元素
@@ -791,85 +870,94 @@ export default {
           // 如果处于最后一列，那么需要换行
           this.addObject.columnNumber = 1
           this.addObject.rowNumber++
-          this.addObject.y = (this.beforeHeight + this.areaYGap + (this.addObject.rowNumber - 1) * (this.height + this.viewGap))
-          this.addObject.x = this.areaXGap + (this.addObject.columnNumber - 1) * (this.width + this.viewGap)
+          this.addObject.y =
+            this.beforeHeight +
+            this.areaYGap +
+            (this.addObject.rowNumber - 1) * (this.height + this.viewGap)
+          this.addObject.x =
+            this.areaXGap +
+            (this.addObject.columnNumber - 1) * (this.width + this.viewGap)
           // 元素列表所占据的总高度（包含各种内边距，元素和元素的间距）
-          this.listHeight = this.height * this.addObject.rowNumber + this.areaYGap * 2 + (this.addObject.rowNumber - 1) * this.viewGap
+          this.listHeight =
+            this.height * this.addObject.rowNumber +
+            this.areaYGap * 2 +
+            (this.addObject.rowNumber - 1) * this.viewGap
         } else {
           // 如果不处于临界状态，不需要考虑换行问题
           this.addObject.x = this.addObject.x + (this.width + this.viewGap)
           this.addObject.columnNumber++
         }
       }
-    },
-  },
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-	.dragsort-box {
+.dragsort-box {
+}
+.dragsort-area {
+  /*height: 100%;*/
+  height: calc(100vh - 40rpx);
+}
 
-	}
-	.dragsort-area {
-		/*height: 100%;*/
-    height: calc(100vh - 40rpx);
-	}
+.dragsort-before {
+}
 
-	.dragsort-before {}
+/* 需要撑开拖拽内容区域高度 */
+.dragsort-list {
+}
 
-	/* 需要撑开拖拽内容区域高度 */
-	.dragsort-list {}
+.dragsort-after {
+}
 
-	.dragsort-after {}
+.dragsort-delete {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  /* padding: 14rpx 0; */
+  height: 90rpx;
+  background-color: #dd6161;
+  color: #ffffff;
+  opacity: 0;
+}
+.opacity {
+  opacity: 1;
+}
 
-	.dragsort-delete {
-		position: fixed;
-		bottom: 0;
-		left: 0;
-		z-index: 100;
-		/* padding: 14rpx 0; */
-		height: 90rpx;
-		background-color: #dd6161;
-		color: #FFFFFF;
-		opacity: 0;
-	}
-	.opacity{
-		opacity: 1;
-	}
+.deleteicon {
+  font-size: 17px;
+}
 
-	.deleteicon {
-		font-size: 17px;
-	}
+.dragsort-view {
+  position: absolute !important;
+  text-align: center;
+  background-color: #c0c4cc;
+  color: #fff;
+  border-radius: 5px;
+  box-sizing: border-box;
+  z-index: 90;
+}
 
-	.dragsort-view {
-		position: absolute !important;
-		text-align: center;
-    background-color: #C0C4CC;
-		color: #fff;
-    border-radius: 5px;
-		box-sizing: border-box;
-		z-index: 90;
-	}
+.dragsort-view-active {
+  box-shadow: 0 0 40rpx #dddddd;
+  z-index: 99;
+}
 
-	.dragsort-view-active {
-    box-shadow: 0 0 40rpx #DDDDDD;
-		z-index: 99;
-	}
+.dragsort-view-item {
+  position: relative;
+  flex: 1;
+  font-size: 16px;
+  width: 100%;
+  height: 100%;
+}
 
-	.dragsort-view-item {
-		position: relative;
-		flex: 1;
-		font-size: 16px;
-		width: 100%;
-		height: 100%;
-	}
-
-	.btnAdd{
-		background-color: #F7F7F7;
-	}
-	.btnAdd-icon{
-		color: #B2B2B2;
-		font-size: 90rpx;
-	}
-
+.btnAdd {
+  background-color: #f7f7f7;
+}
+.btnAdd-icon {
+  color: #b2b2b2;
+  font-size: 90rpx;
+}
 </style>

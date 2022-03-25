@@ -84,14 +84,17 @@
     "@fullhuman/postcss-purgecss": "3.0.0",
     "@vue/babel-preset-app": "^4.5.12",
     "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "^5.0.4",
     "@vue/cli-service": "~4.5.0",
     "autoprefixer": "9.8.6",
+    "babel-eslint": "^10.1.0",
     "babel-plugin-import": "^1.11.0",
     "cross-env": "^7.0.2",
     "eslint": "^7.11.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^7.0.1",
     "jest": "^25.4.0",
     "mini-types": "*",
@@ -108,7 +111,33 @@
     "tailwindcss": "^2.0.4",
     "vue-template-compiler": "^2.6.11"
   },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {}
+  },
+  "prettier": {
+    "eslintIntegration": true,
+    "stylelintIntegration": true,
+    "singleQuote": true,
+    "semi": false,
+    "insertPragma": false,
+    "trailingComma": "none",
+    "arrowParens": "avoid"
+  },
   "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
     "Android >= 4",
     "ios >= 8"
   ],

@@ -1,8 +1,8 @@
 <script>
 import setting from '@/setting'
-import { dbRequest } from '@/api/common'
+// import { dbRequest } from '@/api/common'
 
-const app = getApp()
+// const app = getApp()
 
 export default {
   onLaunch() {
@@ -11,10 +11,8 @@ export default {
     this.getOpenid()
     this.globalData = {}
   },
-  onShow() {
-  },
-  onHide() {
-  },
+  onShow() {},
+  onHide() {},
   methods: {
     getOpenid() {
       // 调用云函数
@@ -27,15 +25,15 @@ export default {
         data: {},
         success: res => {
           uni.setStorageSync('openid', res.result.openid)
-        },
+        }
       })
     },
     getUpdateManager() {
       if (uni.canIUse('getUpdateManager')) {
         const updateManager = uni.getUpdateManager()
-        updateManager.onCheckForUpdate(function (res) {
+        updateManager.onCheckForUpdate(function(res) {
           if (res.hasUpdate) {
-            updateManager.onUpdateReady(function () {
+            updateManager.onUpdateReady(function() {
               uni.showModal({
                 title: '更新提示',
                 content: '新版本已经准备好，是否重启应用？',
@@ -45,15 +43,15 @@ export default {
                     // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
                     updateManager.applyUpdate()
                   }
-                },
-
+                }
               })
             })
-            updateManager.onUpdateFailed(function () {
+            updateManager.onUpdateFailed(function() {
               // 新的版本下载失败
               uni.showModal({
                 title: '已经有新版本了哟~',
-                content: '新版本已经上线啦~，请您删除当前小程序，重新搜索打开哟~',
+                content:
+                  '新版本已经上线啦~，请您删除当前小程序，重新搜索打开哟~'
               })
             })
           }
@@ -70,14 +68,14 @@ export default {
           //   此处请填入环境 ID, 环境 ID 可打开云控制台查看
           //   如不填则使用默认环境（第一个创建的环境）
           env: setting.cloudEnv,
-          traceUser: true,
+          traceUser: true
         })
       }
-    },
-  },
+    }
+  }
 }
 </script>
 
 <style>
-	/*每个页面公共css */
+/*每个页面公共css */
 </style>

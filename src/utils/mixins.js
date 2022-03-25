@@ -11,8 +11,8 @@ export const getList = {
       loadText: {
         loadmore: '轻轻上拉',
         loading: '努力加载中',
-        nomore: '实在没有了',
-      },
+        nomore: '实在没有了'
+      }
     }
   },
   onLoad() {
@@ -35,7 +35,7 @@ export const getList = {
         this.noMore = true
         this.status = 'nomore'
       }
-    },
+    }
   },
   onPullDownRefresh() {
     this.pageNum = 1
@@ -45,9 +45,9 @@ export const getList = {
   },
   onReachBottom() {
     if (!this.noMore) {
-      this.status = 'loading';
+      this.status = 'loading'
       this.pageNum++
       this.getList()
     }
-  },
+  }
 }

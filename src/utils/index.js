@@ -4,10 +4,11 @@ import setting from '@/setting'
 const QQMapWX = require('@/lib/qqmap-wx-jssdk.min.js')
 
 const qqmapsdk = new QQMapWX({
-  key: setting.MAP_KEY,
+  key: setting.MAP_KEY
 })
 
-export const formatTime = (time, template = 'YY/MM/DD HH:mm:ss') => dayjs(time).format(template)
+export const formatTime = (time, template = 'YY/MM/DD HH:mm:ss') =>
+  dayjs(time).format(template)
 
 /**
  * 授权请求
@@ -23,7 +24,7 @@ export function setAuthorize(authorizeScope, modal) {
       modal = {
         title: '授权',
         content: '需要您设置授权已使用相应功能',
-        confirmText: '设置',
+        confirmText: '设置'
       }
     }
     uni.getSetting({
@@ -43,10 +44,10 @@ export function setAuthorize(authorizeScope, modal) {
                 uni.showToast({
                   title: '授权失败',
                   icon: 'none',
-                  duration: 3000,
+                  duration: 3000
                 })
                 reject(err)
-              },
+              }
             })
             break
           case true:
@@ -66,7 +67,7 @@ export function setAuthorize(authorizeScope, modal) {
                         uni.showToast({
                           title: '授权失败',
                           icon: 'none',
-                          duration: 3000,
+                          duration: 3000
                         })
                       }
                     },
@@ -75,16 +76,16 @@ export function setAuthorize(authorizeScope, modal) {
                       uni.showToast({
                         title: '打开设置异常',
                         icon: 'none',
-                        duration: 3000,
+                        duration: 3000
                       })
-                    },
+                    }
                   })
                 } else {
                   reject(res)
                   uni.showToast({
                     title: '授权失败',
                     icon: 'none',
-                    duration: 3000,
+                    duration: 3000
                   })
                 }
               },
@@ -93,9 +94,9 @@ export function setAuthorize(authorizeScope, modal) {
                 uni.showToast({
                   title: '弹窗异常',
                   icon: 'none',
-                  duration: 3000,
+                  duration: 3000
                 })
-              },
+              }
             })
             break
         }
@@ -105,9 +106,9 @@ export function setAuthorize(authorizeScope, modal) {
         uni.showToast({
           title: '获取当前设置异常',
           icon: 'none',
-          duration: 3000,
+          duration: 3000
         })
-      },
+      }
     })
   })
 }
@@ -123,7 +124,7 @@ export function getLocation() {
     const modal = {
       title: '授权',
       content: '需要您授权使用位置信息',
-      confirmText: '设置',
+      confirmText: '设置'
     }
     setAuthorize(scope, modal)
       .then(() => {
@@ -137,9 +138,9 @@ export function getLocation() {
             uni.showToast({
               title: '获取位置信息失败',
               icon: 'none',
-              duration: 3000,
+              duration: 3000
             })
-          },
+          }
         })
       })
       .catch(err => {
@@ -169,9 +170,9 @@ export function reverseGeocoder(location) {
         uni.showToast({
           title: err.message,
           icon: 'none',
-          duration: 3000,
+          duration: 3000
         })
-      },
+      }
     })
   })
 }
@@ -199,9 +200,9 @@ export function mapSearch(keyword, location) {
         uni.showToast({
           title: err.message,
           icon: 'none',
-          duration: 3000,
+          duration: 3000
         })
-      },
+      }
     })
   })
 }

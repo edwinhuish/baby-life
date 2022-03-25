@@ -4,33 +4,45 @@
       <view class="user__header-warp">
         <!-- 头像组 -->
         <view class="flex user__header" @click.stop="clickUser">
-          <image class="layout-abs-center user__header-image" :src="detail.avatar"
-                 mode="aspectFill"></image>
+          <image
+            :src="detail.avatar"
+            class="layout-abs-center user__header-image"
+            mode="aspectFill"
+          />
         </view>
       </view>
       <view class="flex flex-auto overflow-hidden user__content">
         <view class="layout-col-slide flex-auto overflow-hidden pl-2">
-          <text class="truncate" @click.stop="clickUser()">
-            {{ detail.name }}</text>
-          <text class="user__content-note text-gray-400 truncate">{{
-              timestampFormat(detail.publishTime) }}</text>
+          <text class="truncate" @click.stop="clickUser()">{{ detail.name }}</text>
+          <text class="user__content-note text-gray-400 truncate">
+            {{ timestampFormat(detail.publishTime) }}
+          </text>
         </view>
         <view class="layout-col-slide">
-          <text class="text-gray-400 location">{{detail.location}}</text>
-          <text class="text-gray-400 weather">{{detail.weather}}</text>
+          <text class="text-gray-400 location">{{ detail.location }}</text>
+          <text class="text-gray-400 weather">{{ detail.weather }}</text>
         </view>
       </view>
     </view>
 
-    <view class="text break-words">{{detail.content}}</view>
+    <view class="text break-words">{{ detail.content }}</view>
     <view class="layout-start-wrap mt-1">
       <view class="imgList">
-        <view class="mr-1 inline-block" v-for="(item,index) in imgList" :key="index">
-          <lazy-video v-if="item.fileType === 'video'" :item="item" :img-width="imgWidth"
-                      :img-height="imgHeight"></lazy-video>
-          <image v-else @click.stop="previewImg(index)" :src="item.cloudPath"
-                 mode="aspectFill" lazy-load
-                 :style="{width:imgWidth+'px','max-height':imgHeight+'px'}"></image>
+        <view v-for="(item,index) in imgList" :key="index" class="mr-1 inline-block">
+          <lazy-video
+            v-if="item.fileType === 'video'"
+            :img-height="imgHeight"
+            :img-width="imgWidth"
+            :item="item"
+          />
+          <image
+            v-else
+            :src="item.cloudPath"
+            :style="{width:imgWidth+'px','max-height':imgHeight+'px'}"
+            lazy-load
+            mode="aspectFill"
+            @click.stop="previewImg(index)"
+          />
         </view>
       </view>
     </view>
@@ -43,23 +55,24 @@ import LazyVideo from '../../components/lazy-video'
 
 export default {
   components: {
-    LazyVideo,
+    LazyVideo
   },
   props: {
     imgList: {
-      type: Array,
+      default: () => [],
+      type: Array
     },
     detail: {
       type: Object,
-      default: () => ({}),
-    },
+      default: () => ({})
+    }
   },
   data() {
     return {
-      windowWidth: 0,	// 屏幕可用宽度
-      windowHeight: 0,	// 屏幕可用高度
-      imgWidth: 0,	// 图片宽度
-      imgHeight: 0,	// 图片高度
+      windowWidth: 0, // 屏幕可用宽度
+      windowHeight: 0, // 屏幕可用高度
+      imgWidth: 0, // 图片宽度
+      imgHeight: 0 // 图片高度
     }
   },
   mounted() {
@@ -77,9 +90,8 @@ export default {
         current,
         urls: this.imgList.map(v => v.cloudPath),
         longPressActions: {
-          itemList: ['保存图片'],
-
-        },
+          itemList: ['保存图片']
+        }
       })
     },
     // 自适应判断
@@ -99,9 +111,11 @@ export default {
       const timestampDiff = Date.now() - timestamp // 参数时间戳与当前时间戳相差秒数
 
       const ret = time.fromNow()
-      if (timestampDiff < 60 * 1000) { // 一分钟以内
+      if (timestampDiff < 60 * 1000) {
+        // 一分钟以内
         return '刚刚'
-      } else if (timestampDiff < 3600 * 1000) { // 一小时前之内
+      } else if (timestampDiff < 3600 * 1000) {
+        // 一小时前之内
         return ret
       } else if (time.isToday()) {
         return `今天 ${time.format('HH:mm')}`
@@ -138,37 +152,38 @@ export default {
     // 点击聊天
     clickChat() {
       this.$emit('clickChat')
-    },
-  },
+    }
+  }
 }
 </script>
 
 <style>
-.imgList{
+.imgList {
   margin: 0 3%;
 }
-.text{
+.text {
   margin: 1% 3% 2%;
 }
-.user__header, .user__header-image {
+.user__header,
+.user__header-image {
   width: 45px;
   height: 45px;
   border: 1px solid #eee;
   overflow: hidden;
   border-radius: 5px;
 }
-.user__header-image{
+.user__header-image {
   flex-wrap: wrap-reverse;
 }
-.user__content{
+.user__content {
   padding: 2px 0;
 }
-.user__content-note{
+.user__content-note {
   font-size: 11px;
 }
-.location, .weather{
+.location,
+.weather {
   padding: 3px;
   font-size: 11px;
 }
-
 </style>

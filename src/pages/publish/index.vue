@@ -1,29 +1,44 @@
 <template>
   <!-- 组件必须设置高度，否则内部容器填充不起来 -->
   <view class="w-full overflow-auto album-content">
-    <lz-album ref="rAlbum" v-model="list" :location="location" :lon_lat="lon_lat" :weather="weather"
-              :address="address"
-              @sort="onAlbumSort" @click="onAlbumClick" @add="onAlbumAdd" @delete="onAlbumDelete">
-      <template v-slot:before>
+    <lz-album
+      ref="rAlbum"
+      v-model="list"
+      :address="address"
+      :location="location"
+      :lon_lat="lon_lat"
+      :weather="weather"
+      @add="onAlbumAdd"
+      @click="onAlbumClick"
+      @delete="onAlbumDelete"
+      @sort="onAlbumSort"
+    >
+      <template #before>
         <view class="px-3 pt-2">
-          <u-input v-model="content" type="textarea" :focus="false" :maxlength="927"
-                   class="moment-think" height="50" :auto-height="false"
-                   placeholder="这一刻的想法..." />
+          <u-input
+            v-model="content"
+            :auto-height="false"
+            :focus="false"
+            :maxlength="927"
+            class="moment-think"
+            height="50"
+            placeholder="这一刻的想法..."
+            type="textarea"
+          />
         </view>
       </template>
-      <template v-slot:after>
+      <template #after>
         <view class="px-2 pb-2">
           <u-cell-group>
-            <u-cell-item title="萧潇提示" value="可选择36张图片，一次最多9张" icon="star" :arrow="false" />
+            <u-cell-item :arrow="false" icon="star" title="萧潇提示" value="可选择36张图片，一次最多9张" />
           </u-cell-group>
           <u-cell-group>
-            <u-cell-item title="所在位置" :value="location" icon="map" @click="chooseLocation" />
+            <u-cell-item :value="location" icon="map" title="所在位置" @click="chooseLocation" />
           </u-cell-group>
           <u-cell-group>
-            <u-cell-item title="当前天气" :value="weather" icon="heart" :arrow="false" />
+            <u-cell-item :arrow="false" :value="weather" icon="heart" title="当前天气" />
           </u-cell-group>
-          <u-button type="success" open-type="getUserProfile" @click="prePublish" ripple
-                    :loading="loading">发表</u-button>
+          <u-button :loading="loading" open-type="getUserProfile" ripple type="success" @click="prePublish">发表</u-button>
         </view>
       </template>
     </lz-album>
@@ -37,7 +52,7 @@ import { getLocation, mapSearch, reverseGeocoder } from '@/utils'
 
 export default {
   components: {
-    LzAlbum,
+    LzAlbum
   },
   data() {
     return {
@@ -51,7 +66,7 @@ export default {
       userInfo: null,
       openid: '',
       weather: '',
-      lon_lat: {},
+      lon_lat: {}
     }
   },
   onLoad() {
@@ -64,42 +79,39 @@ export default {
   },
   methods: {
     getLocation() {
-      getLocation()
-        .then(res => {
-          const { longitude, latitude } = res
-          this.lon_lat = { longitude, latitude }
-          this.getLocationInfo({ longitude, latitude })
-          // this.getNearbyAttractions(longitude, latitude)
-          this.getWeather(latitude + ':' + longitude)
-        })
-    },
-    chooseLocation() {
-      wx.chooseLocation({}).then(res => {
-        console.log(res)
-        const {
-          longitude, latitude, name, address,
-        } = res
+      getLocation().then(res => {
+        const { longitude, latitude } = res
         this.lon_lat = { longitude, latitude }
-        this.address = address + name
         this.getLocationInfo({ longitude, latitude })
+        // this.getNearbyAttractions(longitude, latitude)
         this.getWeather(latitude + ':' + longitude)
       })
+    },
+    chooseLocation() {
+      wx.chooseLocation({})
+        .then(res => {
+          console.log(res)
+          const { longitude, latitude, name, address } = res
+          this.lon_lat = { longitude, latitude }
+          this.address = address + name
+          this.getLocationInfo({ longitude, latitude })
+          this.getWeather(latitude + ':' + longitude)
+        })
         .catch(() => {
           this.getLocation()
         })
     },
     getLocationInfo(location) {
-      reverseGeocoder(location)
-        .then(res => {
-          console.log('当前位置信息：', res)
-          const { province, city, district } = res.result.ad_info
-          this.location = province + city + district
-        })
+      reverseGeocoder(location).then(res => {
+        console.log('当前位置信息：', res)
+        const { province, city, district } = res.result.ad_info
+        this.location = province + city + district
+      })
     },
     getNearbyAttractions(longitude, latitude) {
       mapSearch('社区', {
         longitude,
-        latitude,
+        latitude
       }).then(res => {
         console.log(res)
       })
@@ -108,6 +120,7 @@ export default {
       getWeather(area).then(([error, res]) => {
         const weatherInfo = res.data.results[0].now
         this.weather = weatherInfo.text + '：' + weatherInfo.temperature + '°'
+        console.log(error)
       })
     },
     queryOpenid(openid) {
@@ -115,9 +128,10 @@ export default {
         {
           method: 'where',
           params: {
-            openid,
-          },
-        }, { method: 'get' }
+            openid
+          }
+        },
+        { method: 'get' }
       ]
       return dbRequest('user', actions)
     },
@@ -128,9 +142,9 @@ export default {
           params: {
             data: {
               openid,
-              userInfo,
-            },
-          },
+              userInfo
+            }
+          }
         }
       ]
       dbRequest('user', actions).then(res => {
@@ -155,7 +169,7 @@ export default {
             }
             this.publish()
           })
-        },
+        }
       })
     },
     publish() {
@@ -163,12 +177,17 @@ export default {
       const list = this.$refs.rAlbum.list
       list.forEach(media => {
         console.log(media)
-        const {
-          lon_lat, location, address, weather,
-        } = this
+        const { lon_lat, location, address, weather } = this
         if (media.cloudPath) {
           const {
-            cloudPath, fileType, height, id, size, sortID, width, thumbCloudPath,
+            cloudPath,
+            fileType,
+            height,
+            id,
+            size,
+            sortID,
+            width,
+            thumbCloudPath
           } = media
           imgList.push({
             cloudPath,
@@ -182,7 +201,7 @@ export default {
             lon_lat,
             location,
             address,
-            weather,
+            weather
           })
         }
       })
@@ -204,9 +223,9 @@ export default {
               name: this.userInfo.nickName,
               avatar: this.userInfo.avatarUrl,
               lon_lat: this.lon_lat,
-              weather: this.weather,
-            },
-          },
+              weather: this.weather
+            }
+          }
         }
       ]
       dbRequest('blog', actions).then(res => {
@@ -238,21 +257,21 @@ export default {
         id: res.cloudPath,
         sortID: res.sortID,
         src: res.src,
-        ...res,
+        ...res
       })
     },
     onAlbumDelete(data) {
       // 返回删除的图片实体
       // 到后台删除
       console.info('删除成功')
-    },
-  },
+    }
+  }
 }
 </script>
 
 <style lang="scss">
-.moment-think{
-  ::v-deep .u-input__input{
+.moment-think {
+  ::v-deep .u-input__input {
     height: 300upx;
     font-size: 16px;
   }
